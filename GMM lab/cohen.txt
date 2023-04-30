@@ -1,0 +1,228 @@
+#include <bits/stdc++.h>
+#include <GL/glut.h>
+#include <string.h>
+
+GLfloat xMn = -3, xMx = 3, yMn = -3, yMx = 3;
+int left = 1, right = 2, bot = 4, top = 8;
+
+void mark(int x, int y, int xoffset, int yoffset, char str[])
+{
+    int w = glutBitmapLength(GLUT_BITMAP_HELVETICA_12, (unsigned char *)str);
+    glRasterPos2f(x + xoffset, y + yoffset);
+    int len = strlen(str);
+    for (int i = 0; i < len; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
+    }
+}
+void lines(int x1, int y1, int x2, int y2)
+{
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y2);
+    glEnd();
+    glFlush();
+}
+
+int get_code(GLfloat x, GLfloat y)
+{
+    int code = 0;
+    if (x < xMn)
+        code |= left;
+    if (x > xMx)
+        code |= right;
+    if (y > yMx)
+        code |= top;
+    if (y < yMn)
+        code |= bot;
+    return code;
+}
+void drawRegion()
+{
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(xMn, -7.0, 1.0f);
+    glVertex3f(xMn, 7.0, 1.0f);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(xMx, -7.0, 1.0f);
+    glVertex3f(xMx, 7.0, 1.0f);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(-7.0, yMn, 1.0f);
+    glVertex3f(7.0, yMn, 1.0f);
+    glEnd();
+    glBegin(GL_LINES);
+
+    glVertex3f(-7.0, yMx, 1.0f);
+    glVertex3f(7.0, yMx, 1.0f);
+    glEnd();
+    glFlush();
+}
+void clip(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2)
+{
+    int c1 = get_code(x1, y1);
+    int c2 = get_code(x2, y2);
+    int c;
+    GLfloat x, y;
+    bool flag = false;
+    while (true)
+    {
+        if ((c1 | c2) == 0)
+        {
+            // line inside window already so accepted
+            flag = true;
+            break;
+        }
+        else if ((c1 & c2) != 0)
+        {
+            // line rejected
+            break;
+        }
+        else
+        {
+            if (c1)
+                c = c1;
+            else
+                c = c2;
+            if (c & left)
+            {
+                x = xMn;
+                y = y1 + (y2 - y1) * (xMn - x1) / (x2 - x1);
+            }
+            if (c & right)
+            {
+                x = xMx;
+                y = y1 + (y2 - y1) * (xMx - x1) / (x2 - x1);
+            }
+            if (c & bot)
+            {
+                y = yMn;
+                x = x1 + (x2 - x1) * (yMn - y1) / (y2 - y1);
+            }
+            if (c & top)
+            {
+                y = yMx;
+                x = x1 + (x2 - x1) * (yMx - y1) / (y2 - y1);
+            }
+            if (c == c1)
+            {
+                x1 = x;
+                y1 = y;
+                c1 = get_code(x1, y1);
+            }
+            else
+            {
+                x2 = x;
+                y2 = y;
+                c2 = get_code(x2, y2);
+            }
+        }
+    }
+    if (flag)
+    {
+        glBegin(GL_LINES);
+        glVertex2f(x1, y1);
+        glVertex2f(x2, y2);
+        glEnd();
+        glFlush();
+    }
+}
+
+void mydisplay()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    mark(0, 0, 0, 0, (char *)"0000");
+    mark(-5, 0, 0, 0, (char *)"0001");
+    mark(4, 0, 0, 0, (char *)"0010");
+    mark(4, 4, 0, 0, (char *)"1010");
+    mark(-5, 4, 0, 0, (char *)"1001");
+    mark(0, 4, 0, 0, (char *)"1000");
+    mark(4, -5, 0, 0, (char *)"0110");
+    mark(-5, -5, 0, 0, (char *)"0101");
+    mark(0, -5, 0, 0, (char *)"0100");
+
+    drawRegion();
+    mark(-5, 10, 0, 0, (char *)"A(-5,10)");
+    mark(-7, 7, 0, 0, (char *)"B(-7,7)");
+    mark(6, 2, 0, 0, (char *)"C(6,2)");
+    mark(5, -1, 0, 0, (char *)"D(5,-1)");
+    mark(-2, 2, 0, 0, (char *)"E(-2,2)");
+    mark(2, -2, 0, 0, (char *)"F(2,-2)");
+    mark(2, 6, 0, 0, (char *)"G(2,6)");
+    mark(-2, 5, 0, 0, (char *)"H(-2,5)");
+    mark(-2, 3, 0, 0, (char *)"p1(-1,3)");
+    mark(-1, 3, 0, 0, (char *)"p2(0,3)");
+    mark(3, -2, 0, 0, (char *)"p3(3,-1)");
+    mark(3, 0, 0, 0, (char *)"p4(3,0)");
+
+    // AB
+    lines(-5, 10, -7, 7);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    clip(-5, 10, -7, 7); // AB
+    // CD
+    lines(6, 2, 5, -1);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    clip(6, 2, 5, -1); // CD
+    // BH
+    lines(-7, 7, -2, 5);
+    glColor3f(1.0f, 1.0f, 0.0f);
+    clip(-7, 7, -2, 5); // BH
+    // EF
+    lines(-2, 2, 2, -2);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    clip(-2, 2, 2, -2);
+    // eg
+    lines(-2, 2, 2, 6);
+    glColor3f(0.0f, 0.0f, 1.0f);
+    clip(-2, 2, 2, 6); // eg
+    // fh
+    lines(2, -2, -2, 5);
+    glColor3f(0.0f, 1.0f, 1.0f);
+    clip(2, -2, -2, 5); // DF
+    // fd
+    lines(2, -2, 5, -1);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    clip(2, -2, 5, -1); // EH
+    // gh
+    lines(2, 6, -2, 5);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    clip(2, 6, -2, 5); // DJ
+    // de
+    lines(5, -1, -2, 2);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    clip(5, -1, -2, 2); // EG
+    // Fd
+    lines(2, -2, 5, -1);
+    glColor3f(1.0f, 0.0f, 1.0f);
+    clip(2, -2, 5, -1);
+}
+
+void myInit()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glColor3f(0.0f, 0.5f, 0.5f);
+    // Set the matrix mode to projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    // Set up the 2D orthographic projection
+    gluOrtho2D(-15, 15, -15, 15);
+    glFlush();
+}
+
+int main(int argC, char **argV)
+{
+    glutInit(&argC, argV);
+    glutInitWindowPosition(50, 50);
+    glutInitWindowSize(800, 600);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);     // sets the initial display mode
+    glutCreateWindow("Cohen-Sundelander-Algorithm"); // creates the original window
+    myInit();
+    glutDisplayFunc(mydisplay);
+    glutMainLoop();
+
+    return 0;
+}

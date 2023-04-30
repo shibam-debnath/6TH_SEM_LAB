@@ -1,0 +1,167 @@
+#include <iostream>
+#include <GL/freeglut.h>
+#include <math.h>
+using namespace std;
+
+void Init() {
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glColor3f(1.0, 1.0, 1.0);
+	glPointSize(3.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-500, 500, -500, 500);
+}
+
+void drawCircle(float cx, float cy, float r, int num_segments)
+{
+    float theta = 3.1415926 * 2 / float(num_segments);
+    float tangetial_factor = tanf(theta);
+    float radial_factor = cosf(theta);
+    float x = r;
+    float y = 0;
+    glLineWidth(2);
+    glBegin(GL_LINE_LOOP);
+    for (int ii = 0; ii < num_segments; ii++)
+    {
+        glVertex2f(x + cx, y + cy);//output vertex 
+        float tx = -y;
+        float ty = x;
+
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
+
+        x *= radial_factor;
+        y *= radial_factor;
+    }
+    glEnd();
+}
+
+int v1x = 0,v1y = 200, v2x = -173, v2y = -100, v3x = -175, v3y = -100, v4x = 175, v4y = -100, v5x = 0, v5y = 200, v6x = 173, v6y = -100; 
+
+void drawFigure() {
+	glBegin(GL_LINES);
+	glVertex2f(v1x,v1y);
+	glVertex2f(v2x,v2y);
+	glVertex2f(v3x,v3y);
+	glVertex2f(v4x,v4y);
+	glVertex2f(v5x,v5y);
+	glVertex2f(v6x,v6y);
+	glEnd();
+	glFlush();
+	drawCircle(0,0,200,1000);
+	glFlush();
+}
+
+void transformRotate (float deg, float xaxis, float yaxis, float zaxis) {
+	glColor3f (0.0f, 0.0f, 1.0f);
+	glRotatef (deg, xaxis, yaxis, zaxis);
+	drawFigure ();
+}
+
+void transformTranslate (float xaxis, float yaxis, float zaxis) {
+	glColor3f (0.0f, 1.0f, 0.0f);
+	glTranslatef (xaxis, yaxis, zaxis);
+	drawFigure ();
+}
+
+void transformScale (float xaxis, float yaxis, float zaxis) {
+	glColor3f (1.0f, 0.0f, 0.0f);
+	glScalef (xaxis, yaxis, zaxis);
+	drawFigure ();
+}
+
+void transformShear (float xaxis, float yaxis, float zaxis) {
+	glColor3f (0.7f, 0.5f, 0.0f);
+	if (xaxis != 0.0) {
+		v1x += v1y * xaxis;
+		v2x += v2y * xaxis;
+		v3x += v3y * xaxis;
+		v4x += v4y * xaxis;
+		v5x += v5y * xaxis;
+		v6x += v6y * xaxis;
+	}
+	if (yaxis != 0.0) {
+		v1y += v1x * yaxis;
+		v2y += v2x * yaxis;
+		v3y += v3x * yaxis;
+		v4y += v4x * yaxis;
+		v5y += v5x * yaxis;
+		v6y += v6x * yaxis;
+	}
+	drawFigure ();
+}
+
+void transformReflect (float xaxis, float yaxis, float zaxis) {
+	glColor3f (0.0f, 0.5f, 0.2f);
+	if (xaxis == 1.0) {
+		v1y = -v1y;
+		v2y = -v2y;
+		v3y = -v3y;
+		v4y = -v4y;
+		v5y = -v5y;
+		v6y = -v6y;
+	}
+	if (yaxis == 1.0) {
+		v1x = -v1x;
+		v2x = -v2x;
+		v3x = -v3x;
+		v4x = -v4x;
+		v5x = -v5x;
+		v6x = -v6x;
+	}
+	drawFigure ();
+}
+
+void myDisplay () {
+	glColor3f (1.0, 1.0, 1.0);
+	drawFigure ();
+    int opt;
+    printf ("######################\n"
+           	"######## MENU ########\n"
+           	"######################\n"
+           	"1. TRANSLATION\n"
+		   	"2. SCALING\n"
+		   	"3. SHEARING\n"
+		   	"4. REFLECTION\n"
+		   	"5. ROTATION\n"
+			"######################\n"
+			"> ");
+    scanf (" %d", &opt);
+    switch (opt) {
+    	case 1:
+        	transformTranslate (200.0, 200.0, 0.0);
+        	break;
+    	case 2:
+        	transformScale (0.5, 0.5, 0.0);
+        	break;
+    	case 3:
+    		transformShear (1.2, 0.0, 0.0);
+        	break;
+        case 4:
+        	transformReflect (1.0, 0.0, 0.0);
+        	break;
+        case 5:
+			transformRotate (90.0, 0.0, 0.0, 1.0);
+			break;
+    }
+}
+
+int main(int argc, char** argv) {
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowPosition(10, 10);
+	glutInitWindowSize(500, 500);
+	glutCreateWindow("Figure");
+	glBegin(GL_LINES);
+	glColor3f(1, 0, 0);
+	glVertex2f(-400, 0);
+	glVertex2f(400, 0);
+	glVertex2f(0, 400);
+	glVertex2f(0, -400);
+	glEnd();
+	glFlush();
+	glutDisplayFunc(myDisplay);
+	Init();
+	glutMainLoop();
+	return 0;
+}

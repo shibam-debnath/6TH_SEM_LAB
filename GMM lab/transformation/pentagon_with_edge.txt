@@ -1,0 +1,170 @@
+#include <Gl/glut.h>
+#include <iostream>
+#include <string.h>
+using namespace std;
+int x1 = 10, x2 = 50, x3 = 5, x4 = 55, x5 = 30;
+int y1 = 10, y2 = 10, y3 = 30, y4 = 30, y5 = 50;
+int choice = 0;
+/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+void init()
+{
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(-200, 200, -200, 200);
+}
+void drawPolygon()
+{   
+	glBegin(GL_LINE_LOOP);
+	glVertex2i(x1, y1);
+	glVertex2i(x2, y2);
+	glVertex2i(x4, y4);
+	glVertex2i(x5, y5);
+	glVertex2i(x3, y3);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(x1, y1);
+	glVertex2i(x5, y5);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(x2, y2);
+	glVertex2i(x5, y5);
+	glEnd();
+	glFlush();
+}
+void drawAxes()
+{
+	glBegin(GL_LINES);
+	glVertex2i(-200, 0);
+	glVertex2i(200, 0);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(0, -200);
+	glVertex2i(0, 200);
+	glEnd();
+	glFlush();
+}
+void choice1()
+{
+	glColor3f(1.0, 0.0, 0.0);
+	glTranslatef(50.0, 50.0, 0.0);
+	drawPolygon();
+}
+void choice2()
+{
+	glColor3f(1.0, 0.0, 0.0);
+	glScalef(3.0, 3.0, 0.0);
+	drawPolygon();
+}
+void choice3(float x, float y)
+{
+	//	given the shearing parameters are taken to be for x=0.3 and for y=0.4
+	if (x != 0)
+	{
+		x1 += y1 * x;
+		x2 += y2 * x;
+		x3 += y3 * x;
+		x4 += y4 * x;
+		x5 += y5 * x;
+	}
+	else if (y != 0)
+	{
+		y1 += x1 * y;
+		y2 += x2 * y;
+		y3 += x3 * y;
+		y4 += x4 * y;
+		y5 += x5 * y;
+	}
+	glColor3f(1.0, 0.0, 0.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2i(x1, y1);
+	glVertex2i(x2, y2);
+	glVertex2i(x4, y4);
+	glVertex2i(x5, y5);
+	glVertex2i(x3, y3);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(x1, y1);
+	glVertex2i(x5, y5);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(x2, y2);
+	glVertex2i(x5, y5);
+	glEnd();
+	glFlush();
+}
+void choice4()
+{
+	glColor3f(1.0, 0.0, 0.0);
+	//	reflection about the y axis
+	glBegin(GL_LINE_LOOP);
+	glVertex2i(-x1, y1);
+	glVertex2i(-x2, y2);
+	glVertex2i(-x4, y4);
+	glVertex2i(-x5, y5);
+	glVertex2i(-x3, y3);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(-x1, y1);
+	glVertex2i(-x5, y5);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(-x2, y2);
+	glVertex2i(-x5, y5);
+	glEnd();
+	glFlush();
+}
+void choice5()
+{
+	glColor3f(1.0, 0.0, 0.0);
+	glRotatef(180, 0.0, 0.0, 0.0);
+	drawPolygon();
+}
+
+void display()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawAxes();
+	drawPolygon();
+	cout << "The choice is:-"
+		 << " " << choice << endl;
+	if (choice == 1)
+	{
+		choice1();
+	}
+	else if (choice == 2)
+	{
+		choice2();
+	}
+	else if (choice == 3)
+	{
+		choice3(0.4, 0.0);
+	}
+	else if (choice == 4)
+	{
+		choice4();
+	}
+	else if (choice == 5)
+	{
+		choice5();
+	}
+	return;
+}
+int main(int argc, char **argv)
+{
+	cout << "Enter the choice you want to perform" << endl;
+	cout << "1.Translation" << endl;
+	cout << "2.Scaling" << endl;
+	cout << "3.Shearing" << endl;
+	cout << "4.Reflection" << endl;
+	cout << "5.Rotation" << endl;
+	cin >> choice;
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(700, 700);
+	glutCreateWindow("Bresenham Line Drawing");
+	glutDisplayFunc(display);
+	init();
+	glutMainLoop();
+	return 0;
+}

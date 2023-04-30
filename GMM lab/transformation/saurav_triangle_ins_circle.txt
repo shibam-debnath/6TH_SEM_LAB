@@ -1,0 +1,319 @@
+#include <GL/freeglut.h>
+#include <GL/gl.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+
+#define SIZE 1000
+
+int r = 200;
+int choice;
+int nc;
+#define PI 3.14159
+
+int get(int p, int q, int n, int m)
+{
+    return p * m + q;
+}
+
+double rad(double deg)
+{
+    return deg * (PI / 180);
+}
+
+float col()
+{
+    return fmax(double(rand()) / RAND_MAX, 0.6);
+}
+
+void drawpoly(int mode, int np, double *p, float r, float g, float b)
+{
+    glColor3f(r, g, b);
+
+    glBegin(mode);
+    for (int i = 0; i < np; i++)
+    {
+        glVertex2d(p[get(0, i, 3, np)], p[get(1, i, 3, np)]);
+    }
+
+    glEnd();
+    glFlush();
+}
+
+void axes()
+{
+    glColor3f(0, 0, 1);
+
+    glBegin(GL_LINES);
+
+    glVertex2i(0, -SIZE);
+    glVertex2i(0, SIZE);
+    glVertex2i(-SIZE, 0);
+    glVertex2i(SIZE, 0);
+
+    glEnd();
+    glFlush();
+}
+
+double *triangle(double x1, double y1, double x2, double y2, double x3, double y3)
+{
+    double *t = (double *)malloc(3 * 3 * sizeof(double));
+    t[get(0, 0, 3, 3)] = x1;
+    t[get(0, 1, 3, 3)] = x2;
+    t[get(0, 2, 3, 3)] = x3;
+    t[get(1, 0, 3, 3)] = y1;
+    t[get(1, 1, 3, 3)] = y2;
+    t[get(1, 2, 3, 3)] = y3;
+    t[get(2, 0, 3, 3)] = t[get(2, 1, 3, 3)] = t[get(2, 2, 3, 3)] = 1;
+    return t;
+}
+
+double *circle(double p, double q, int r)
+{
+    int pk = 1 - r;
+
+    double *c = NULL;
+
+    double x = p, y = q + (double)r;
+
+    int count = 0;
+    while (x - p <= y - q)
+    {
+        count++;
+        c = (double *)realloc(c, sizeof(double) * (3 * count));
+
+        if (pk > 0)
+        {
+            pk += (2 * (x - p)) - (2 * (y - q)) + 5;
+            y--;
+        }
+        else
+        {
+            pk += (2 * (x - p)) + 3;
+        }
+        x++;
+    }
+
+    c = NULL;
+    c = (double *)realloc(c, sizeof(double) * (3 * count * 8));
+
+    x = p, y = q + (double)r;
+
+    for (int i = 0; i < count; i++)
+    {
+        c[get(0, i + 0 * count, 3, count * 8)] = x;
+        c[get(1, i + 0 * count, 3, count * 8)] = y;
+        c[get(2, i + 0 * count, 3, count * 8)] = 1;
+        c[get(0, i + 1 * count, 3, count * 8)] = y;
+        c[get(1, i + 1 * count, 3, count * 8)] = x;
+        c[get(2, i + 1 * count, 3, count * 8)] = 1;
+        c[get(0, i + 2 * count, 3, count * 8)] = y;
+        c[get(1, i + 2 * count, 3, count * 8)] = -x;
+        c[get(2, i + 2 * count, 3, count * 8)] = 1;
+        c[get(0, i + 3 * count, 3, count * 8)] = x;
+        c[get(1, i + 3 * count, 3, count * 8)] = -y;
+        c[get(2, i + 3 * count, 3, count * 8)] = 1;
+        c[get(0, i + 4 * count, 3, count * 8)] = -x;
+        c[get(1, i + 4 * count, 3, count * 8)] = -y;
+        c[get(2, i + 4 * count, 3, count * 8)] = 1;
+        c[get(0, i + 5 * count, 3, count * 8)] = -y;
+        c[get(1, i + 5 * count, 3, count * 8)] = -x;
+        c[get(2, i + 5 * count, 3, count * 8)] = 1;
+        c[get(0, i + 6 * count, 3, count * 8)] = -y;
+        c[get(1, i + 6 * count, 3, count * 8)] = x;
+        c[get(2, i + 6 * count, 3, count * 8)] = 1;
+        c[get(0, i + 7 * count, 3, count * 8)] = -x;
+        c[get(1, i + 7 * count, 3, count * 8)] = y;
+        c[get(2, i + 7 * count, 3, count * 8)] = 1;
+
+        if (pk > 0)
+        {
+            pk += (2 * (x - p)) - (2 * (y - q)) + 5;
+            y--;
+        }
+        else
+        {
+            pk += (2 * (x - p)) + 3;
+        }
+        x++;
+    }
+
+    nc = count * 8;
+
+    return c;
+}
+
+double *matmul(int l, int m, int n, double *p, double *q)
+{
+    double *r = (double *)malloc(sizeof(double) * (l * n));
+
+    for (int i = 0; i < l; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            r[get(i, j, l, n)] = 0;
+            for (int k = 0; k < m; k++)
+                r[get(i, j, l, n)] += (p[get(i, k, l, m)] * q[get(k, j, m, n)]);
+        }
+    }
+
+    return r;
+}
+
+double *mul(double *mat, int np, double *p)
+{
+    return matmul(3, 3, np, mat, p);
+}
+
+double *transl(int tx, int ty, int np, double *p)
+{
+    double *r = (double *)malloc(sizeof(double) * (3 * np));
+
+    double *m = (double *)malloc(sizeof(double) * 9);
+    memset(m, 0, sizeof(double) * 9);
+
+    m[get(0, 0, 3, 3)] = 1;
+    m[get(0, 2, 3, 3)] = tx;
+    m[get(1, 1, 3, 3)] = 1;
+    m[get(1, 2, 3, 3)] = ty;
+    m[get(2, 2, 3, 3)] = 1;
+
+    return mul(m, np, p);
+}
+
+double *shear(double shx, double shy, int np, double *p)
+{
+    double *r = (double *)malloc(sizeof(double) * (3 * np));
+
+    double *m = (double *)malloc(sizeof(double) * 9);
+    memset(m, 0, sizeof(double) * 9);
+
+    m[get(0, 0, 3, 3)] = 1;
+    m[get(0, 1, 3, 3)] = shx;
+    m[get(1, 0, 3, 3)] = shy;
+    m[get(1, 1, 3, 3)] = 1;
+    m[get(2, 2, 3, 3)] = 1;
+
+    return mul(m, np, p);
+}
+
+double *scale(double sx, double sy, int np, double *p)
+{
+    double *r = (double *)malloc(sizeof(double) * (3 * np));
+
+    double *m = (double *)malloc(sizeof(double) * 9);
+    memset(m, 0, sizeof(double) * 9);
+
+    m[get(0, 0, 3, 3)] = sx;
+    m[get(1, 1, 3, 3)] = sy;
+    m[get(2, 2, 3, 3)] = 1;
+
+    return mul(m, np, p);
+}
+
+double *refl(int np, double *p)
+{
+    double *r = (double *)malloc(sizeof(double) * (3 * np));
+
+    double *m = (double *)malloc(sizeof(double) * 9);
+    memset(m, 0, sizeof(double) * 9);
+
+    m[get(0, 0, 3, 3)] = 1;
+    m[get(1, 1, 3, 3)] = -1;
+    m[get(2, 2, 3, 3)] = 1;
+
+    return mul(m, np, p);
+}
+
+double *rot(int deg, int np, double *p)
+{
+    double *r = (double *)malloc(sizeof(double) * (3 * np));
+
+    double *m = (double *)malloc(sizeof(double) * 9);
+    memset(m, 0, sizeof(double) * 9);
+
+    m[get(0, 0, 3, 3)] = cos(rad(deg));
+    m[get(0, 1, 3, 3)] = -sin(rad(deg));
+    m[get(1, 0, 3, 3)] = sin(rad(deg));
+    m[get(1, 1, 3, 3)] = cos(rad(deg));
+    m[get(2, 2, 3, 3)] = 1;
+
+    return mul(m, np, p);
+}
+
+void drawfig(double *t, double *c)
+{
+    float r = col(), g = col(), b = col();
+    drawpoly(GL_LINE_LOOP, 3, t, r, g, b);
+    drawpoly(GL_POINTS, nc, c, r, g, b);
+}
+
+void draw()
+{
+    axes();
+
+    double *t = triangle(0, r, r * cos(rad(30)), -r * sin(rad(30)), -r * cos(rad(30)), -r * sin(rad(30)));
+    double *c = circle(0, 0, r);
+
+    drawfig(t, c);
+
+    switch (choice)
+    {
+    case 1:
+        t = transl(100, 200, 3, t);
+        c = transl(100, 200, nc, c);
+        drawfig(t, c);
+        break;
+    case 2:
+        t = scale(1.5, 1, 3, t);
+        c = scale(1.5, 1, nc, c);
+        drawfig(t, c);
+        break;
+    case 3:
+        t = shear(1, 1.5, 3, t);
+        c = shear(1, 1.5, nc, c);
+        drawfig(t, c);
+        break;
+    case 4:
+        t = refl(3, t);
+        c = refl(nc, c);
+        drawfig(t, c);
+        break;
+    case 5:
+        t = rot(90, 3, t);
+        c = rot(90, nc, c);
+        drawfig(t, c);
+        break;
+    }
+}
+
+int main(int argc, char **argv)
+{
+    srand(time(0));
+
+    printf("1) Translation\n");
+    printf("2) Scaling\n");
+    printf("3) Shearing\n");
+    printf("4) Reflection\n");
+    printf("5) Rotation (by 90 degs)\n");
+    printf("Choice > ");
+
+    scanf("%d", &choice);
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(SIZE, SIZE);
+    glutCreateWindow("Title");
+    glMatrixMode(GL_PROJECTION_MATRIX);
+    glLoadIdentity();
+    gluOrtho2D(-SIZE, SIZE, -SIZE, SIZE);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glutDisplayFunc(draw);
+    glutMainLoop();
+}

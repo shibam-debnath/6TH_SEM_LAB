@@ -1,0 +1,30 @@
+#include <windows.h>
+#include <GL/glut.h>
+#include <iostream>
+using namespace std;
+void initGL()
+{
+}
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_LINE_LOOP);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glVertex2f(-0.5f, 0.3f);
+    glVertex2f(-0.5f, -0.3f);
+    glVertex2f(0.5f, -0.3f);
+    glVertex2f(0.5f, 0.3f);
+    glEnd();
+    glFlush();
+}
+int main(int argc, char **argv)
+{
+    glutInit(&argc, argv);
+    glutCreateWindow("Red Edged Rectangle");
+    glutInitWindowSize(1600, 900);
+    glutInitWindowPosition(0, 0);
+    glutDisplayFunc(display);
+    initGL();
+    glutMainLoop();
+    return 0;
+}

@@ -1,0 +1,85 @@
+#include <GL/freeglut.h>
+#include <stdio.h>
+
+int r;
+
+void myInit() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glMatrixMode(GL_PROJECTION);
+	gluOrtho2D(-100, 100, -100, 100);
+}
+void drawaxes()
+{
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(-400,0);
+	glVertex2f(400,0);
+	glEnd();
+	
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(0,-400);
+	glVertex2f(0,400);
+	glEnd();
+}
+void draw_pixel(int x, int y) {
+	glBegin(GL_POINTS);
+	glVertex2i(x, y);
+	glEnd();
+}
+
+void draw_circle(int r) {
+
+    int p=0;
+	int x,y;
+	x = 0; y = r;
+	draw_pixel(x,y);
+	p=1-r;
+	while(x<=y){
+		if(p<0){
+			x+=1;
+			draw_pixel(x,y);
+			draw_pixel(y,x);
+			draw_pixel(x,-y);
+			draw_pixel(-y,x);
+			draw_pixel(-x,-y);
+			draw_pixel(-y,-x);
+			draw_pixel(-x,y);
+			draw_pixel(y,-x);
+			p=p+2*x+1;
+		}
+		else{
+			x+=1;y-=1;
+			draw_pixel(x,y);
+			draw_pixel(y,x);
+			draw_pixel(x,-y);
+			draw_pixel(-y,x);
+			draw_pixel(-x,-y);
+			draw_pixel(-y,-x);
+			draw_pixel(-x,y);
+			draw_pixel(y,-x);
+			p=p+2*x+1-2*y;
+		}
+	}
+}
+
+void myDisplay() {
+	drawaxes();
+	draw_circle(r);
+	glFlush();
+}
+
+int main(int argc, char **argv) {
+
+	printf( "Enter radius: \n");
+	scanf("%d", &r);
+    
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(100, 100);
+	glutCreateWindow("Bresenham's Line Drawing");
+	myInit();
+	glutDisplayFunc(myDisplay);
+	glutMainLoop();
+	return 0;
+}

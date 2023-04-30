@@ -1,0 +1,181 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <GL/glut.h>
+
+GLfloat px = 10.0f,py = 20.0f;
+GLfloat V1X = -5.0f, V1Y = 5.0f, V1Z = 0.0f;
+GLfloat V2X = 5.0f, V2Y = -5.0f, V2Z = 0.0f;
+GLfloat V3X = 0.0f, V3Y = 10.0f, V3Z = 0.0f;
+GLfloat V4X = -5.0f, V4Y = -5.0f, V4Z = 0.0f;
+GLfloat V5X = 5.0f, V5Y = 5.0f, V5Z = 0.0f;
+  
+void drawaxis(){
+		glColor3f (1.0f, 1.0f, 1.0f);
+	   glBegin (GL_LINE_LOOP);
+    	glVertex3f (-400.0, 0.0, 0.0);
+    	glVertex3f (400.0, 0.0, 0.0);
+    glEnd ();
+    
+    glBegin (GL_LINE_LOOP);
+    	glVertex3f (0.0, -400.0, 0.0);
+    	glVertex3f (0.0, 400.0, 0.0);
+    glEnd ();
+    glFlush ();
+}
+void myInit () {
+	
+	glClear (GL_COLOR_BUFFER_BIT);
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glColor3f (0.0f, 0.5f, 0.5f);
+    glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D (-50, 50, -50, 50);
+    drawaxis();
+}
+
+
+
+void drawStar () {
+	
+	glColor3f (0.0f, 1.5f, 1.5f);
+	glBegin (GL_LINE_LOOP);
+	glVertex3f (V1X+px, V1Y+py, V1Z);
+	glVertex3f (V2X+px, V2Y+py, V2Z);
+	glVertex3f (V3X+px, V3Y+py, V3Z);
+	glVertex3f (V4X+px, V4Y+py, V4Z);
+	glVertex3f (V5X+px, V5Y+py, V5Z);
+	glEnd ();
+	glFlush ();
+}
+
+void transformRotate (float deg, float xaxis, float yaxis, float zaxis) {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	glPushMatrix();
+	glRotatef(deg, xaxis, yaxis, zaxis);
+	drawStar();
+    
+}
+
+void transformTranslate (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X += xaxis;
+	V2X += xaxis;
+	V3X += xaxis;
+	V4X += xaxis;
+	V5X += xaxis;
+	V1Y += yaxis;
+	V2Y += yaxis;
+	V3Y += yaxis;
+	V4Y += yaxis;
+	V5Y += yaxis;
+	drawStar();
+}
+
+void transformScale (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X *= xaxis;
+	V2X *= xaxis;
+	V3X *= xaxis;
+	V4X *= xaxis;
+	V5X *= xaxis;
+	V1Y *= yaxis;
+	V2Y *= yaxis;
+	V3Y *= yaxis;
+	V4Y *= yaxis;
+	V5Y *= yaxis;
+	drawStar();
+}
+
+void transformShear (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X += yaxis * V1Y;
+	V2X += yaxis * V2Y;
+	V3X += yaxis * V3Y;
+	V4X += yaxis * V4Y;
+	V5X += yaxis * V5Y;
+	V1Y += xaxis * V1X;
+	V2Y += xaxis * V2X;
+	V3Y += xaxis * V3X;
+	V4Y += xaxis * V4X;
+	V5Y += xaxis * V5X;
+	drawStar();
+   
+}
+
+void transformReflect (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+    drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+    if (yaxis == 1.0) {
+        V1X *= -1;
+        V2X *= -1;
+        V3X *= -1;
+        V4X *= -1;
+        V5X *= -1;
+    }
+    else if (xaxis == 1.0) {
+        V1Y *= -1;
+        V2Y *= -1;
+        V3Y *= -1;
+        V4Y *= -1;
+        V5Y *= -1;
+    }
+
+    drawStar();
+    glFlush();
+}
+
+  
+void myDisplay () {
+	glColor3f (1.0, 1.0, 1.0);
+	drawaxis();
+	drawStar ();
+   int ch;
+    printf("Choose opertion: \n"
+           	"1. Translation\n"
+		   	"2. Scaling\n"
+		   	"3. Shearing\n"
+		   	"4. Reflection\n"
+		   	"5. Rotation\n"
+			"-> ");
+    scanf(" %d", &ch);
+    switch(ch){
+    	case 1:
+        	transformTranslate(-1.0, -5.0, 0.0);
+        	break;
+    	case 2:
+        	transformScale(2.0, 3.0, 0);
+        	break;
+    	case 3:
+    		transformShear(0.0, 1.1, 0.0);
+        	break;
+        case 4:
+        	transformReflect(1.0, 0.0, 0.0);
+        	break;
+        case 5: 
+			transformRotate(180.0, 0.0, 0.0, 1.0);
+			break;
+    }
+}
+  
+int main (int argc, char **argv) {
+    glutInit (&argc, argv);
+    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowPosition (100, 0);
+    glutInitWindowSize (1000, 1000);
+    glutCreateWindow ("2D TRANSFORMATION OVER THE STAR");
+    glutDisplayFunc (myDisplay);
+    myInit ();
+    glutMainLoop ();
+    return 0;
+}
+
+//Write a program to perform 2d transformation based on pivot element p(100,200)

@@ -1,0 +1,202 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <GL/glut.h>
+
+GLfloat V1X = -0.1f, V1Y = 0.7f, V1Z = 0.0f;
+GLfloat V2X = 0.0f, V2Y = 0.9f, V2Z = 0.0f;
+GLfloat V3X = 0.1f, V3Y = 0.7f, V3Z = 0.0f;
+GLfloat V4X = 0.1f, V4Y = 0.0f, V4Z = 0.0f;
+GLfloat V5X = -0.1f, V5Y = 0.0f, V5Z = 0.0f;
+  
+void drawaxis(){
+		glColor3f (1.0f, 0.0f, 1.0f);
+	   glBegin (GL_LINE_LOOP);
+    	glVertex3f (-400.0, 0.0, 0.0);
+    	glVertex3f (400.0, 0.0, 0.0);
+    glEnd ();
+    
+    glBegin (GL_LINE_LOOP);
+    	glVertex3f (0.0, -400.0, 0.0);
+    	glVertex3f (0.0, 400.0, 0.0);
+    glEnd ();
+    glFlush ();
+}
+
+void reshape(int width, int height) {
+   glViewport(0, 0, width, height);
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+   glMatrixMode(GL_MODELVIEW);
+}
+void myInit () {
+	glClear (GL_COLOR_BUFFER_BIT);
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glColor3f (0.0f, 0.5f, 0.5f);
+    glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D (-1.0, 1.0, -1.0, 1.0);
+    drawaxis();
+}
+
+
+
+void drawStar () {
+	
+	
+	glColor3f (0.0f, 1.5f, 1.5f);
+	glBegin (GL_LINE_LOOP);
+	glVertex3f (V1X, V1Y, V1Z);
+	glVertex3f (V2X, V2Y, V2Z);
+	glVertex3f (V3X, V3Y, V3Z);
+	glVertex3f (V4X, V4Y, V4Z);
+	glVertex3f (V5X, V5Y, V5Z);
+	glEnd ();
+	glFlush ();
+	
+	
+//	glLineWidth(3.0);  // Set the line width to 3 pixels
+//   glBegin(GL_LINES);
+//      glVertex2f(0.0, 0.0);  // Starting point
+//      glVertex2f(0.0, 0.8);  // Ending point
+//   glEnd();
+//
+//   // Draw the arrow head
+//   glBegin(GL_TRIANGLES);
+//      glVertex2f(-0.1, 0.7);
+//      glVertex2f(0.1, 0.7);
+//      glVertex2f(0.0, 0.9);
+//   glEnd();
+//	glFlush ();
+}
+
+void transformRotate (float deg, float xaxis, float yaxis, float zaxis) {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	glPushMatrix();
+	glRotatef(deg, xaxis, yaxis, zaxis);
+	drawStar();
+    
+}
+
+void transformTranslate (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X += xaxis;
+	V2X += xaxis;
+	V3X += xaxis;
+	V4X += xaxis;
+	V5X += xaxis;
+	V1Y += yaxis;
+	V2Y += yaxis;
+	V3Y += yaxis;
+	V4Y += yaxis;
+	V5Y += yaxis;
+	drawStar();
+}
+
+void transformScale (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X *= xaxis;
+	V2X *= xaxis;
+	V3X *= xaxis;
+	V4X *= xaxis;
+	V5X *= xaxis;
+	V1Y *= yaxis;
+	V2Y *= yaxis;
+	V3Y *= yaxis;
+	V4Y *= yaxis;
+	V5Y *= yaxis;
+	drawStar();
+}
+
+void transformShear (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+	drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+	V1X += yaxis * V1Y;
+	V2X += yaxis * V2Y;
+	V3X += yaxis * V3Y;
+	V4X += yaxis * V4Y;
+	V5X += yaxis * V5Y;
+	V1Y += xaxis * V1X;
+	V2Y += xaxis * V2X;
+	V3Y += xaxis * V3X;
+	V4Y += xaxis * V4X;
+	V5Y += xaxis * V5X;
+	drawStar();
+   
+}
+
+void transformReflect (float xaxis, float yaxis, float zaxis) {
+	glClear(GL_COLOR_BUFFER_BIT);
+    drawaxis();
+	glColor3f (0.0f, 0.5f, 1.0f);
+    if (yaxis == 1.0) {
+        V1X *= -1;
+        V2X *= -1;
+        V3X *= -1;
+        V4X *= -1;
+        V5X *= -1;
+    }
+    else if (xaxis == 1.0) {
+        V1Y *= -1;
+        V2Y *= -1;
+        V3Y *= -1;
+        V4Y *= -1;
+        V5Y *= -1;
+    }
+
+    drawStar();
+    glFlush();
+}
+
+  
+void myDisplay () {
+	glColor3f (1.0, 1.0, 1.0); // Set the color to white
+//	drawaxis();
+	drawStar ();
+   int ch;
+    printf("Choose opertion: \n"
+           	"1. Translation\n"
+		   	"2. Scaling\n"
+		   	"3. Shearing\n"
+		   	"4. Reflection\n"
+		   	"5. Rotation\n"
+			"-> ");
+    scanf(" %d", &ch);
+    switch(ch){
+    	case 1:
+        	transformTranslate(-1.0, -5.0, 0.0);
+        	break;
+    	case 2:
+        	transformScale(2.0, 3.0, 0);
+        	break;
+    	case 3:
+    		transformShear(1.2, 0.0, 0.0);
+        	break;
+        case 4:
+        	transformReflect(1.0, 0.0, 0.0);
+        	break;
+        case 5: 
+			transformRotate(180.0, 0.0, 0.0, 1.0);
+			break;
+    }
+}
+
+  
+int main (int argc, char **argv) {
+    glutInit (&argc, argv);
+    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+//    glutInitWindowPosition (100, 0);
+    glutInitWindowSize (1000, 1000);
+    glutCreateWindow ("2D TRANSFORMATION OVER THE Arrow");
+    glutDisplayFunc (myDisplay);
+    myInit ();
+    glutMainLoop ();
+    return 0;
+}

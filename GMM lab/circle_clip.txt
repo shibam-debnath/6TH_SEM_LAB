@@ -1,0 +1,120 @@
+#include <GL/glut.h>
+#include <stdio.h>
+#include <math.h>
+
+#define MAX 10
+
+GLfloat xmin = -50, ymin = -50, xmax = 50, ymax = 50;
+GLfloat xd1, yd1, xd2, yd2;
+
+typedef struct{
+    GLfloat x, y;
+} point;
+
+point win[MAX], obj[MAX];
+
+int n;
+
+void display(){
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(xmin, ymin);
+    glVertex2f(xmax, ymin);
+    glVertex2f(xmax, ymax);
+    glVertex2f(xmin, ymax);
+    glEnd();
+
+    glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_POLYGON);
+    for(int i=0;i<n;i++)
+        glVertex2f(obj[i].x, obj[i].y);
+    glEnd();
+
+    glFlush();
+}
+
+int inside(point p){
+    if(p.x > xmin && p.x < xmax && p.y > ymin && p.y < ymax)
+        return 1;
+    else
+        return 0;
+}
+
+void find_intersect(point p1, point p2, int edge, point *i_point){
+    GLfloat m = (p2.y-p1.y)/(p2.x-p1.x);
+    GLfloat c = p1.y - m*p1.x;
+    switch(edge){
+        case 0: // left edge
+            i_point->x = xmin;
+            i_point->y = m*xmin + c;
+            break;
+        case 1: // right edge
+            i_point->x = xmax;
+            i_point->y = m*xmax + c;
+            break;
+        case 2: // bottom edge
+            i_point->y = ymin;
+            i_point->x = (ymin-c)/m;
+            break;
+        case 3: // top edge
+            i_point->y = ymax;
+            i_point->x = (ymax-c)/m;
+            break;
+    }
+}
+
+void clip_and_draw(){
+    point s, p1, p2, i_point;
+    int i;
+    glColor3f(0.0, 0.0, 1.0);
+    glBegin(GL_POLYGON);
+    for(i=0;i<n;i++){
+        p1 = obj[i];
+        p2 = obj[(i+1)%n];
+        if(inside(p1) && inside(p2)){
+            glVertex2f(p1.x, p1.y);
+            glVertex2f(p2.x, p2.y);
+        }
+        else if(inside(p1) && !inside(p2)){
+            find_intersect(p1, p2, 0, &i_point);
+            glVertex2f(i_point.x, i_point.y);
+            glVertex2f(p2.x, p2.y);
+        }
+        else if(!inside(p1) && inside(p2)){
+            find_intersect(p1, p2, 0, &i_point);
+            glVertex2f(i_point.x, i_point.y);
+            glVertex2f(p2.x, p2.y);
+        }
+    }
+    glEnd();
+    glFlush();
+}
+void myInit(){
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glColor3f(0.0, 0.0, 0.0);
+    glPointSize(5.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-100.0, 100.0, -100.0, 100.0);
+}
+
+int main(int argc, char **argv){
+    printf("Enter the number of vertices of the polygon: ");
+    scanf("%d", &n);
+    printf("Enter the vertices of the polygon: ");
+    for(int i=0;i<n;i++){
+        scanf("%f%f", &obj[i].x, &obj[i].y);
+    }
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(0, 0);
+    glutCreateWindow("Circle Clipping");
+    glutDisplayFunc(display);
+    myInit();
+    glutMainLoop();
+    return 0;
+}
